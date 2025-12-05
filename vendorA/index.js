@@ -1,30 +1,22 @@
-// vendorA.js
-// Simulasi Vendor A (Warung Legacy)
-// Semua tipe data berupa STRING
-
 const express = require('express');
+const db = require('./database');
 const app = express();
-const port = 3000; // port khusus Vendor A
+const port = 3002;
 
-// Data produk Vendor A
-const products = [
-  {
-    "kd_produk": "A001",
-    "nm_brg": "Kopi Bubuk 100g",
-    "hrg": "15000",     // harga STRING
-    "ket_stok": "ada"   // stok STRING: "ada" / "habis"
-  },
-  {
-    "kd_produk": "A002",
-    "nm_brg": "Gula Aren 250g",
-    "hrg": "12000",
-    "ket_stok": "habis"
-  }
-];
+app.get('/api/distro', (req, res) => {
+  db.all('SELECT * FROM produk', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
 
-// Endpoint API Vendor A
-app.get('/api/warung', (req, res) => {
-  res.json(products);
+    // Konversi isAvailable ke boolean
+    const result = rows.map(item => ({
+      sku: item.sku,
+      productName: item.productName,
+      price: item.price,
+      isAvailable: item.isAvailable === 1
+    }));
+
+    res.json(result);
+  });
 });
 
 // Jalankan server
